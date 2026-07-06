@@ -74,8 +74,5 @@ metadata, exercising the full pipeline: ICY parsing, decode, FFT, UI.
 
 - [x] ICY streaming with metadata + auto-reconnect
 - [x] Spectrum visualizer (gradient bars, peak dots, partial-block tips)
-- [ ] `https://` stream support (needs `rustls` or `native-tls`)
 - [ ] Volume control / mute keybindings
-- [ ] Windows testing (should work — ratatui/crossterm are cross-platform —
-      but untested)
 - [x] Homebrew install (via `keenanjohnson/homebrew-tap`)
