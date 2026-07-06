@@ -48,11 +48,20 @@ see file header).
   doesn't kill the other. The buffering is load-bearing: without it, ffplay
   only pulls its pipe at real-time playback pace, back-pressuring the shared
   fanout in bursts that starve ffmpeg between refills — the visualizer then
-  spikes every few seconds instead of tracking the audio. Note: ffmpeg races
-  through Icecast's burst-on-connect while ffplay plays it out, so the
-  visualizer runs a few seconds ahead of the audio.
-- `pcm_thread`: reads exact 2048-frame chunks, `try_send` so chunks DROP
-  when the UI is behind — this keeps the visualizer realtime, never laggy.
+  spikes every few seconds instead of tracking the audio.
+- `pcm_thread`: reads exact 2048-frame chunks and sends ALL of them in order
+  (never drops) — the main loop is a realtime-paced delay line that keeps the
+  viz in sync (see below).
+- Viz/audio sync: ffmpeg decodes Icecast's burst-on-connect far ahead of
+  realtime while ffplay plays it out at realtime, so drawing the freshest
+  decoded PCM would run the visualizer seconds AHEAD of the audio. The main
+  loop instead buffers decoded chunks in a `VecDeque` and releases them to the
+  FFT at realtime pace (a wall-clock sample `budget`); the backlog settles to
+  the same depth ffplay is behind, so the viz tracks what you hear. Audio stays
+  fully decoupled (ffplay pulls AAC at its own pace) so playback never glitches
+  — the delay line only governs the visualizer. Frames with no new chunk hold
+  the last spectrum; an empty backlog (real stream gap) feeds silence so bars
+  decay. `budget` resets to 0 on underrun to resync instead of catching up.
 - `Spectrum`: 2048-pt FFT @ 44.1kHz mono, Hann window, log-spaced bands
   45 Hz–16 kHz. Smoothing: attack `0.3*old + 0.7*new`, decay
   `0.82*old + 0.18*new`, peak dots fall 0.02/frame. The `ln_1p` scaling and
