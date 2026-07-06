@@ -3,6 +3,8 @@
 Stream [Rinse FM](https://www.rinse.fm/) in your terminal, with a live colour
 spectrum visualizer and now-playing metadata.
 
+![rinsefm in action](assets/rinsefm.gif)
+
 ```
  ~ RINSE FM ~ 106.8 ~ LIVE FROM LONDON ~
         ♪ Josey Rebelle - Sunday Morning
