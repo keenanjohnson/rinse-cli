@@ -75,7 +75,6 @@ metadata, exercising the full pipeline: ICY parsing, decode, FFT, UI.
 - [x] ICY streaming with metadata + auto-reconnect
 - [x] Spectrum visualizer (gradient bars, peak dots, partial-block tips)
 - [ ] `https://` stream support (needs `rustls` or `native-tls`)
-- [ ] Pluggable decoders behind cargo features (`symphonia`, optional `fdk`)
 - [ ] Volume control / mute keybindings
 - [ ] Windows testing (should work — ratatui/crossterm are cross-platform —
       but untested)
