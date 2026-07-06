@@ -39,7 +39,7 @@ PATH (`brew install ffmpeg` / `apt install ffmpeg`).
 
 ```bash
 cargo build --release
-./target/release/rinsefm --no-audio      # visualizer only
+./target/release/rinsefm
 ```
 
 ## How it works
