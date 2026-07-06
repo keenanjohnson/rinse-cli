@@ -11,7 +11,7 @@
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::TcpStream;
 use std::process::{Child, Command, Stdio};
-use std::sync::mpsc::{sync_channel, Receiver, TryRecvError};
+use std::sync::mpsc::{channel, Receiver};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -330,7 +330,7 @@ fn days_from_civil(y: i64, m: i64, d: i64) -> i64 {
 
 // ---------------------------------------------------------------- PCM reader
 
-fn pcm_thread(mut pipe: impl Read, tx: std::sync::mpsc::SyncSender<Vec<i16>>) {
+fn pcm_thread(mut pipe: impl Read, tx: std::sync::mpsc::Sender<Vec<i16>>) {
     let bytes = CHUNK_FRAMES * 2;
     let mut buf = vec![0u8; bytes];
     loop {
@@ -341,7 +341,11 @@ fn pcm_thread(mut pipe: impl Read, tx: std::sync::mpsc::SyncSender<Vec<i16>>) {
             .chunks_exact(2)
             .map(|b| i16::from_le_bytes([b[0], b[1]]))
             .collect();
-        let _ = tx.try_send(samples); // drop chunks if the UI falls behind
+        // Send every chunk in order — the main loop paces consumption to
+        // realtime, so dropping here would corrupt the viz delay line.
+        if tx.send(samples).is_err() {
+            return; // UI gone
+        }
     }
 }
 
@@ -613,7 +617,7 @@ fn main() {
         thread::spawn(move || icy_thread(url, sinks, state));
     }
 
-    let (tx, rx): (_, Receiver<Vec<i16>>) = sync_channel(64);
+    let (tx, rx): (_, Receiver<Vec<i16>>) = channel();
     thread::spawn(move || pcm_thread(dec_stdout, tx));
 
     // For Rinse streams, show the real on-air show from the schedule API.
@@ -627,17 +631,52 @@ fn main() {
     let silence = vec![0i16; CHUNK_FRAMES];
     let mut tick = 0usize;
 
+    // Visualizer delay line. ffmpeg decodes Icecast's burst-on-connect far
+    // ahead of realtime while ffplay plays it out at realtime; drawing the
+    // freshest decoded PCM would run the viz seconds ahead of the audio.
+    // Instead we buffer decoded chunks and release them to the FFT at realtime
+    // pace — the backlog settles to the same depth ffplay is behind, so the
+    // visualizer tracks what you actually hear.
+    let max_buffered = SAMPLE_RATE * 15 / CHUNK_FRAMES; // ~15s memory safety cap
+    let mut backlog: std::collections::VecDeque<Vec<i16>> = std::collections::VecDeque::new();
+    let mut budget = 0.0f64; // PCM samples the viz is allowed to advance by
+    let mut last = Instant::now();
+
     'outer: loop {
-        // Pull one chunk (or feed silence so bars keep decaying), then drain backlog.
-        match rx.recv_timeout(Duration::from_millis(50)) {
-            Ok(chunk) => spec.feed(&chunk),
-            Err(_) => spec.feed(&silence),
+        // Ingest everything decoded so far (never drop mid-stream — only trim
+        // the oldest if we somehow fall a long way behind).
+        if let Ok(chunk) = rx.recv_timeout(Duration::from_millis(20)) {
+            backlog.push_back(chunk);
         }
-        loop {
-            match rx.try_recv() {
-                Ok(chunk) => spec.feed(&chunk),
-                Err(TryRecvError::Empty) | Err(TryRecvError::Disconnected) => break,
+        while let Ok(chunk) = rx.try_recv() {
+            backlog.push_back(chunk);
+        }
+        while backlog.len() > max_buffered {
+            backlog.pop_front();
+        }
+
+        // Advance the viz play head by wall-clock time, feeding the FFT the
+        // chunks that just became current. Frames with no new chunk hold the
+        // last spectrum; a genuine underrun (empty backlog) decays the bars.
+        let now = Instant::now();
+        budget += now.duration_since(last).as_secs_f64() * SAMPLE_RATE as f64;
+        last = now;
+        let mut underran = false;
+        while budget >= CHUNK_FRAMES as f64 {
+            match backlog.pop_front() {
+                Some(chunk) => {
+                    spec.feed(&chunk);
+                    budget -= CHUNK_FRAMES as f64;
+                }
+                None => {
+                    underran = true;
+                    budget = 0.0; // resync to realtime rather than catching up
+                    break;
+                }
             }
+        }
+        if underran {
+            spec.feed(&silence);
         }
 
         let _ = terminal.draw(|f| draw_frame(f, &mut spec, &state, tick));
