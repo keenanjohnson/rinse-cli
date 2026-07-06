@@ -518,7 +518,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rinse-rs"
+name = "rinsefm"
 version = "0.1.0"
 dependencies = [
  "crossterm",
