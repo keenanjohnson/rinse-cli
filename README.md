@@ -17,7 +17,7 @@ spectrum visualizer and now-playing metadata.
 ## Install
 
 ```bash
-brew install keenanjohnson/rinsefm/rinsefm
+brew install keenanjohnson/tap/rinsefm
 ```
 
 This pulls in `ffmpeg` (which provides `ffplay`) automatically. Then just run
@@ -77,4 +77,4 @@ metadata, exercising the full pipeline: ICY parsing, decode, FFT, UI.
 - [ ] Volume control / mute keybindings
 - [ ] Windows testing (should work — ratatui/crossterm are cross-platform —
       but untested)
-- [x] Homebrew install (via `keenanjohnson/homebrew-rinsefm` tap)
+- [x] Homebrew install (via `keenanjohnson/homebrew-tap`)

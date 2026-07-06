@@ -9,8 +9,8 @@ cargo-dist-version = "0.32.0"
 ci = "github"
 # The installers to generate for each app (Homebrew only)
 installers = ["homebrew"]
-# Homebrew tap to publish the generated formula to (create this repo first).
-tap = "keenanjohnson/homebrew-rinsefm"
+# Homebrew tap (a homebrew-<name> repo) to publish the generated formula to.
+tap = "keenanjohnson/homebrew-tap"
 # Publish the Homebrew formula automatically on release.
 publish-jobs = ["homebrew"]
 # Target platforms to build apps for (Rust target-triple syntax).
