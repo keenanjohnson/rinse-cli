@@ -17,7 +17,7 @@ publish-jobs = ["homebrew"]
 # Windows is omitted: ffplay pipe behavior there is unverified (see CLAUDE.md).
 targets = ["aarch64-apple-darwin", "aarch64-unknown-linux-gnu", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu"]
 
-# rinse needs ffmpeg/ffplay at runtime; declare it as a run-stage dependency so
+# rinsefm needs ffmpeg/ffplay at runtime; declare it as a run-stage dependency so
 # the generated Homebrew formula gets `depends_on "ffmpeg"` and installs it.
 [dist.dependencies.homebrew]
 ffmpeg = { version = "*", stage = ["run"] }
