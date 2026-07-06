@@ -1,7 +1,12 @@
 [package]
-name = "rinse-rs"
+name = "rinsefm"
 version = "0.1.0"
 edition = "2021"
+description = "Stream Rinse FM (or any Icecast/Shoutcast URL) in your terminal with a live audio spectrum visualizer and now-playing metadata."
+license = "MIT"
+repository = "https://github.com/keenanjohnson/rinse-cli"
+homepage = "https://github.com/keenanjohnson/rinse-cli"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -11,3 +16,8 @@ native-tls = "0.2"
 ratatui = "0.29"
 rustfft = "6"
 serde_json = "1"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"

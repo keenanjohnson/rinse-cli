@@ -1,4 +1,4 @@
-# rinse
+# rinsefm
 
 Stream [Rinse FM](https://www.rinse.fm/) in your terminal, with a live colour
 spectrum visualizer and now-playing metadata.
@@ -14,22 +14,33 @@ spectrum visualizer and now-playing metadata.
 ```
 
 
-## Requirements
-
-- Rust toolchain (stable) — https://rustup.rs
-- `ffmpeg` and `ffplay` on your PATH (`brew install ffmpeg` / `apt install ffmpeg`)
-
-## Build & run
+## Install
 
 ```bash
-cargo build --release
-./target/release/rinse-rs                 # play Rinse FM UK
-./target/release/rinse-rs --bars 48       # more spectrum bars
-./target/release/rinse-rs --no-audio      # visualizer only
-./target/release/rinse-rs --url http://…  # any other Icecast stream
+brew install keenanjohnson/rinsefm/rinsefm
+```
+
+This pulls in `ffmpeg` (which provides `ffplay`) automatically. Then just run
+`rinsefm`.
+
+```bash
+rinsefm                 # play Rinse FM UK
+rinsefm --bars 48       # more spectrum bars
+rinsefm --no-audio      # visualizer only
+rinsefm --url http://…  # any other Icecast stream
 ```
 
 Press `q` (or Ctrl-C) to quit.
+
+## Build from source
+
+Requires a Rust toolchain (https://rustup.rs) and `ffmpeg` + `ffplay` on your
+PATH (`brew install ffmpeg` / `apt install ffmpeg`).
+
+```bash
+cargo build --release
+./target/release/rinsefm --no-audio      # visualizer only
+```
 
 ## How it works
 
@@ -51,7 +62,7 @@ records, and [CLAUDE.md](CLAUDE.md) for AI-assistant project context.
 cd tools && python3 fake_icecast.py
 
 # terminal 2:
-./target/release/rinse-rs --url http://127.0.0.1:8899/stream
+./target/release/rinsefm --url http://127.0.0.1:8899/stream
 ```
 
 The fake server serves a generated AAC tone with rotating `StreamTitle`
@@ -66,4 +77,4 @@ metadata, exercising the full pipeline: ICY parsing, decode, FFT, UI.
 - [ ] Volume control / mute keybindings
 - [ ] Windows testing (should work — ratatui/crossterm are cross-platform —
       but untested)
-- [ ] Publish to crates.io
+- [x] Homebrew install (via `keenanjohnson/homebrew-rinsefm` tap)

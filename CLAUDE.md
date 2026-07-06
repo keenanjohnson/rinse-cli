@@ -4,7 +4,7 @@ Project context for AI-assisted development. Read this before making changes.
 
 ## What this is
 
-`rinse` — a Rust CLI that streams Rinse FM (or any Icecast/Shoutcast URL),
+`rinsefm` — a Rust CLI that streams Rinse FM (or any Icecast/Shoutcast URL),
 plays the audio, and renders a live terminal spectrum visualizer with
 now-playing metadata. Single binary, five crate deps (`ratatui`,
 `crossterm`, `rustfft`, `native-tls`, `serde_json`), external runtime
@@ -19,7 +19,7 @@ cargo fmt                      # format
 
 # End-to-end test without network access to the real stream:
 python3 tools/fake_icecast.py &          # serves 127.0.0.1:8899
-./target/release/rinse-rs --url http://127.0.0.1:8899/stream --no-audio
+./target/release/rinsefm --url http://127.0.0.1:8899/stream --no-audio
 ```
 
 There are no unit tests yet. The fake Icecast server is the primary test
