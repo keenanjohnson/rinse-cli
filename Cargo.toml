@@ -1,6 +1,6 @@
 [package]
 name = "rinsefm"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Stream Rinse FM (or any Icecast/Shoutcast URL) in your terminal with a live audio spectrum visualizer and now-playing metadata."
 license = "MIT"
