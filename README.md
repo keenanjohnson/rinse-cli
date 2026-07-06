@@ -67,15 +67,3 @@ metadata, exercising the full pipeline: ICY parsing, decode, FFT, UI.
 - [ ] Windows testing (should work — ratatui/crossterm are cross-platform —
       but untested)
 - [ ] Publish to crates.io
-
-## License
-
-TBD — MIT OR Apache-2.0 dual licensing is the Rust ecosystem convention.
-Add `LICENSE-MIT` and `LICENSE-APACHE` files and a `license` field in
-`Cargo.toml` before publishing.
-
-## A note on the reference implementation
-
-`reference/rinse.py` is the original Python prototype (same architecture,
-curses instead of ratatui). It's kept for comparison and quick hacking; the
-Rust version is the one under active development.
