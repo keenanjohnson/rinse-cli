@@ -13,7 +13,6 @@ spectrum visualizer and now-playing metadata.
                                  q: quit
 ```
 
-Works with any Icecast/Shoutcast stream, not just Rinse.
 
 ## Requirements
 
