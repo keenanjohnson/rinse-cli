@@ -349,6 +349,7 @@ fn pcm_thread(mut pipe: impl Read, tx: std::sync::mpsc::SyncSender<Vec<i16>>) {
 
 struct Spectrum {
     n: usize,
+    max_n: usize, // upper bound on bands; actual count grows/shrinks to fill width
     window: Vec<f32>,
     bins: Vec<(usize, usize)>, // [start, end) FFT bin range per band
     levels: Vec<f32>,
@@ -369,6 +370,7 @@ impl Spectrum {
             .collect();
         let mut s = Spectrum {
             n: 0,
+            max_n: n,
             window,
             bins: vec![],
             levels: vec![],
@@ -458,9 +460,11 @@ fn draw_frame(frame: &mut ratatui::Frame, spec: &mut Spectrum, state: &Shared, t
     };
     drop(st);
 
-    // Bars geometry.
-    let (bar_w, gap) = if w >= spec.n * 3 { (2usize, 1usize) } else { (1, 1) };
-    let n = spec.n.min(((w - 2) / (bar_w + gap)).max(1));
+    // Bars geometry: 2-wide bars with a 1-col gap, as many as fill the width
+    // (up to spec.max_n). Band count follows the terminal size, growing when
+    // it widens and shrinking when it narrows.
+    let (bar_w, gap) = (2usize, 1usize);
+    let n = ((w - 2) / (bar_w + gap)).clamp(1, spec.max_n);
     if n != spec.n {
         spec.set_bands(n);
     }
@@ -524,7 +528,7 @@ struct Args {
 fn parse_args() -> Args {
     let mut args = Args {
         url: RINSE_URL.into(),
-        bars: 32,
+        bars: 128, // max bands; the visualizer uses as many as fill the terminal
         no_audio: false,
     };
     let mut it = std::env::args().skip(1);
@@ -544,7 +548,7 @@ fn parse_args() -> Args {
 fn usage() -> ! {
     eprintln!(
         "rinse — stream Rinse FM in your terminal, with visuals\n\n\
-         usage: rinse [--url <http-stream-url>] [--bars N] [--no-audio]\n\n\
+         usage: rinse [--url <http-stream-url>] [--bars N (max bands)] [--no-audio]\n\n\
          requires ffmpeg (and ffplay for audio) on your PATH"
     );
     std::process::exit(2);
