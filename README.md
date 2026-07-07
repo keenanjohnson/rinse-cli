@@ -5,17 +5,6 @@ spectrum visualizer and now-playing metadata.
 
 ![rinsefm in action](assets/rinsefm.gif)
 
-```
- ~ RINSE FM ~ 106.8 ~ LIVE FROM LONDON ~
-        ♪ Josey Rebelle - Sunday Morning
-
-  ▂ █ █ ▅ ▃ ▂ ▁     ▂ ▄ █ ▆ ▃ ▁   ▁ ▂ ▁
-  █ █ █ █ █ █ ▅ ▃ ▂ █ █ █ █ █ ▅ ▂ █ █ ▄
-  █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █
-                                 q: quit
-```
-
-
 ## Install
 
 ```bash
@@ -54,25 +43,3 @@ second thread chunks the PCM into a channel; the main thread runs an FFT
 (Hann window, 2048 samples) mapped onto log-spaced frequency bands from
 45 Hz to 16 kHz, and renders with [ratatui](https://ratatui.rs).
 
-See [docs/DESIGN.md](docs/DESIGN.md) for architecture details and decision
-records, and [CLAUDE.md](CLAUDE.md) for AI-assistant project context.
-
-## Testing without hitting the real stream
-
-```bash
-# terminal 1: fake Icecast server on 127.0.0.1:8899 (needs python3 + ffmpeg)
-cd tools && python3 fake_icecast.py
-
-# terminal 2:
-./target/release/rinsefm --url http://127.0.0.1:8899/stream
-```
-
-The fake server serves a generated AAC tone with rotating `StreamTitle`
-metadata, exercising the full pipeline: ICY parsing, decode, FFT, UI.
-
-## Status / roadmap
-
-- [x] ICY streaming with metadata + auto-reconnect
-- [x] Spectrum visualizer (gradient bars, peak dots, partial-block tips)
-- [ ] Volume control / mute keybindings
-- [x] Homebrew install (via `keenanjohnson/homebrew-tap`)
